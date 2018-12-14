@@ -1,0 +1,62 @@
+import pandas as pd
+import numpy as np
+import nltk
+nltk.download('stopwords')
+
+
+
+from nltk.corpus import stopwords
+stop = stopwords.words('english')
+
+train = pd.read_csv('C:\\Users\\U23S57\\Downloads\\train_E6oV3lV.csv')
+train['word_count'] = train['tweet'].apply(lambda x: len(str(x).split(" ")))
+train['char_count'] = train['tweet'].str.len() ## this also includes spaces
+
+def avg_word(sentence):
+  words = sentence.split()
+  return (sum(len(word) for word in words)/len(words))
+train['avg_word'] = train['tweet'].apply(lambda x: avg_word(x))
+
+train['stopwords'] = train['tweet'].apply(lambda x: len([x for x in x.split() if x in stop]))
+train['hastags'] = train['tweet'].apply(lambda x: len([x for x in x.split() if x.startswith('#')]))
+train['numerics'] = train['tweet'].apply(lambda x: len([x for x in x.split() if x.isdigit()]))
+train['upper'] = train['tweet'].apply(lambda x: len([x for x in x.split() if x.isupper()]))
+
+train[['tweet','word_count','char_count','avg_word','stopwords','hastags','numerics','upper']].head()
+# break here-----------------
+
+import pandas as pd
+import nltk
+nltk.download('wordnet')
+nltk.download('punkt')
+import textblob
+from nltk.corpus import stopwords
+from textblob import TextBlob
+from nltk.stem import PorterStemmer
+from textblob import Word
+
+
+
+stop = stopwords.words('english')
+train = pd.read_csv('C:\\Users\\U23S57\\Downloads\\train_E6oV3lV.csv')
+st = PorterStemmer()
+
+train['tweet'] = train['tweet'].apply(lambda x: " ".join(x.lower() for x in x.split()))
+train['tweet'] = train['tweet'].str.replace('[^\w\s]','')
+train['tweet'] = train['tweet'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
+freq = pd.Series(' '.join(train['tweet']).split()).value_counts()[:10]
+unfreq = pd.Series(' '.join(train['tweet']).split()).value_counts()[-10:]
+freq = list(freq.index)
+train['tweet'] = train['tweet'].apply(lambda x: " ".join(x for x in x.split() if x not in freq))
+unfreq = list(unfreq.index)
+#train['tweet'] = train['tweet'].apply(lambda x: " ".join(x for x in x.split() if x not in unfreq))
+#train['tweet'][:5].apply(lambda x: " ".join([st.stem(word) for word in x.split()]))
+#this is for stemming, but we usually prefer lemmatization
+train['tweet'] = train['tweet'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
+#train['tweet'].head()
+TextBlob(train['tweet'][0]).ngrams(2)
+#unfreq
+#freq
+#print freq to see the most common words
+
+#break here -----------
