@@ -1,0 +1,20 @@
+import math as mt
+import numpy as nu
+print("math has the type {}".format(type(mt)))
+print(mt.pi)
+print("pi to 4 sigfigs = {:.4}".format(mt.pi))
+
+print("the log of 32 base 2 is "+str(mt.log(32,2)))
+print("nu.random is a", type(nu.random))
+
+print(nu.random.randint(1,6,6))
+#dir(nu.random)
+rolls = nu.random.randint(low=1, high=6, size=10)
+type(rolls)
+roll10=rolls+10
+roll10<=13
+xlist = [[1,2,3],[2,4,6]]
+print(xlist)
+x = nu.asarray(xlist)
+print("xlist = {}\nx =\n{}".format(xlist,x))
+x[1,-1]
