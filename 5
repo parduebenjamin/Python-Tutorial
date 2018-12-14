@@ -1,0 +1,24 @@
+x = 'Pluto is a planet'
+y = "Pluto is a planet"
+x == y
+print('Pluto\'s a planet!')
+triplequoted_hello = """hello
+world"""
+print(triplequoted_hello)
+planet = "Pluto"
+position = 9
+"{}, you'll always be the {}th planet to me.".format(planet, position)
+#.format() is a "format string", where {}s represent values
+pluto_mass = 1.303 * 10**22
+earth_mass = 5.9722 * 10**24
+population = 52910390
+"{} weighs about {:.2} kilograms ({:.3%} of Earth's mass). It is home to {:,} Plutonians.".format(planet, pluto_mass, pluto_mass / earth_mass, population,)
+s = """Pluto's a {0}.
+No, it's a {1}.
+Either way, I'm a {2}.""".format('planet','dwarf planet', 'huge fan')
+print(s)
+numbers = {'one':1, 'two':2, 'three':3}
+print(numbers['one'])
+print(numbers)
+numbers['one'] = 'Pluto'
+print(numbers)
