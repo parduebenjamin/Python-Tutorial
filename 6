@@ -1,0 +1,26 @@
+x = np.linspace(0, np.pi, 1000)
+
+layout = go.Layout(
+    title='First Example',
+    yaxis=dict(
+        title='volts'
+    ),
+    xaxis=dict(
+        title='nanoseconds'
+    )
+)
+
+trace1 = go.Scatter(
+    x=x,
+    y=np.sin(x),
+    mode='lines',
+    name='sin(x)',
+    #interpolation are how the dots are connected with lines
+    line=dict(
+        shape='spline'
+    )
+    #markers, lines, and lines+markers are scatter options
+)
+
+fig = go.Figure(data = [trace1], layout=layout)
+py.offline.iplot(fig)
