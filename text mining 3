@@ -1,0 +1,218 @@
+#This just gives a word count, character count, avg word length, stopword count, hashtags, numerics, and #uppercasewords
+import pandas as pd
+import nltk
+nltk.download('stopwords')
+
+from nltk.corpus import stopwords
+stop = stopwords.words('english')
+
+train = pd.read_csv('\\\\RTNAS01\\data\\RT-Claims-SIU-User\\Renton_Analyst_Files\\ACA Files\\1 ACAs in Progress\\Check Washing Predictive Analytics\\CHKW_claims_forText_Mining.csv')
+
+train['word_count'] = train['BODYTEXT'].apply(lambda x: len(str(x).split(" ")))
+train['char_count'] = train['BODYTEXT'].str.len() ## this also includes spaces
+
+def avg_word(sentence):
+  words = sentence.split()
+  return (sum(len(word) for word in words)/len(words))
+train['avg_word'] = train['BODYTEXT'].apply(lambda x: avg_word(x))
+
+train['stopwords'] = train['BODYTEXT'].apply(lambda x: len([x for x in x.split() if x in stop]))
+train['hashtags'] = train['BODYTEXT'].apply(lambda x: len([x for x in x.split() if x.startswith('#')]))
+train['numerics'] = train['BODYTEXT'].apply(lambda x: len([x for x in x.split() if x.isdigit()]))
+train['upper'] = train['BODYTEXT'].apply(lambda x: len([x for x in x.split() if x.isupper()]))
+
+print(train[['BODYTEXT','word_count','char_count','avg_word','stopwords','hashtags','numerics','upper']].head())
+
+
+#first cleans the text
+#this give us a term-frequency inverse-document-frequency list
+import pandas as pd
+import numpy as np
+import nltk
+nltk.download('wordnet')
+import textblob
+from nltk.corpus import stopwords
+from textblob import TextBlob
+from nltk.stem import PorterStemmer
+from textblob import Word
+import csv
+
+
+stop = stopwords.words('english')
+train = pd.read_csv('\\\\RTNAS01\\data\\RT-Claims-SIU-User\\Renton_Analyst_Files\\ACA Files\\1 ACAs in Progress\\Check Washing Predictive Analytics\\CHKW_claims_forText_Mining.csv')
+st = PorterStemmer()
+
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x.lower() for x in x.split()))
+train['BODYTEXT'] = train['BODYTEXT'].str.replace('[^\w\s]','')
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
+freq = pd.Series(' '.join(train['BODYTEXT']).split()).value_counts()[:10]
+unfreq = pd.Series(' '.join(train['BODYTEXT']).split()).value_counts()[-10:]
+freq = list(freq.index)
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x for x in x.split() if x not in freq))
+unfreq = list(unfreq.index)
+#train['tweet'] = train['tweet'].apply(lambda x: " ".join(x for x in x.split() if x not in unfreq))
+#train['tweet'][:5].apply(lambda x: " ".join([st.stem(word) for word in x.split()]))
+#this is for stemming, but we usually prefer lemmatization
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
+#train['BODYTEXT'].head()
+
+tf1 = (train['BODYTEXT'][1:2]).apply(lambda x: pd.value_counts(x.split(" "))).sum(axis = 0).reset_index()
+tf1.columns = ['words','tf']
+tf1
+
+for i,word in enumerate(tf1['words']):
+  tf1.loc[i, 'idf'] = np.log(train.shape[0]/(len(train[train['BODYTEXT'].str.contains(word)])))
+tf1
+
+tf1['tfidf'] = tf1['tf'] * tf1['idf']
+print(tf1)
+
+#first cleans the text
+#N-grams are the combination of multiple words used together.
+import pandas as pd
+import nltk
+nltk.download('wordnet')
+import textblob
+from nltk.corpus import stopwords
+from textblob import TextBlob
+from nltk.stem import PorterStemmer
+from textblob import Word
+import csv
+
+
+stop = stopwords.words('english')
+train = pd.read_csv('\\\\RTNAS01\\data\\RT-Claims-SIU-User\\Renton_Analyst_Files\\ACA Files\\1 ACAs in Progress\\Check Washing Predictive Analytics\\CHKW_claims_forText_Mining.csv')
+st = PorterStemmer()
+
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x.lower() for x in x.split()))
+train['BODYTEXT'] = train['BODYTEXT'].str.replace('[^\w\s]','')
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
+freq = pd.Series(' '.join(train['BODYTEXT']).split()).value_counts()[:10]
+unfreq = pd.Series(' '.join(train['BODYTEXT']).split()).value_counts()[-10:]
+freq = list(freq.index)
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x for x in x.split() if x not in freq))
+unfreq = list(unfreq.index)
+#train['tweet'] = train['tweet'].apply(lambda x: " ".join(x for x in x.split() if x not in unfreq))
+#train['tweet'][:5].apply(lambda x: " ".join([st.stem(word) for word in x.split()]))
+#this is for stemming, but we usually prefer lemmatization
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
+#train['BODYTEXT'].head()
+
+
+
+ngramlist = TextBlob(train['BODYTEXT'][0]).ngrams(2)
+
+download_dir = "\\\\RTNAS01\\data\\RT-Claims-SIU-User\\Renton_Analyst_Files\\ACA Files\\1 ACAs in Progress\\Check Washing Predictive Analytics\\ngram.csv" #where you want the file to be downloaded to 
+
+out = open('people.csv', 'w+')
+writer = csv.writer(out)
+for row in ngramlist:
+	writer.writerow(row)
+
+out.close()
+
+print(TextBlob(train['BODYTEXT'][0]).ngrams(2))
+
+
+#download('nseries')
+
+#unfreq
+#freq
+#print freq to see the most common words
+
+
+
+
+#first cleans the text
+#Then gives a word count, character count, avg word length, stopword count, hashtags, numerics, and #uppercasewords
+import pandas as pd
+import nltk
+nltk.download('wordnet')
+nltk.download('stopwords')
+
+import textblob
+from nltk.corpus import stopwords
+from textblob import TextBlob
+from nltk.stem import PorterStemmer
+from textblob import Word
+
+from nltk.corpus import stopwords
+stop = stopwords.words('english')
+
+stop = stopwords.words('english')
+train = pd.read_csv('\\\\RTNAS01\\data\\RT-Claims-SIU-User\\Renton_Analyst_Files\\ACA Files\\1 ACAs in Progress\\Check Washing Predictive Analytics\\CHKW_claims_forText_Mining.csv')
+st = PorterStemmer()
+
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x.lower() for x in x.split()))
+train['BODYTEXT'] = train['BODYTEXT'].str.replace('[^\w\s]','')
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
+freq = pd.Series(' '.join(train['BODYTEXT']).split()).value_counts()[:10]
+unfreq = pd.Series(' '.join(train['BODYTEXT']).split()).value_counts()[-10:]
+freq = list(freq.index)
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x for x in x.split() if x not in freq))
+unfreq = list(unfreq.index)
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x for x in x.split() if x not in unfreq))
+train['BODYTEXT'][:5].apply(lambda x: " ".join([st.stem(word) for word in x.split()]))
+#this is for stemming, but we usually prefer lemmatization
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
+#train['BODYTEXT'].head()
+
+train['word_count'] = train['BODYTEXT'].apply(lambda x: len(str(x).split(" ")))
+train['char_count'] = train['BODYTEXT'].str.len() ## this also includes spaces
+
+def avg_word(sentence):
+  words = sentence.split()
+  return (sum(len(word) for word in words)/len(words))
+train['avg_word'] = train['BODYTEXT'].apply(lambda x: avg_word(x))
+
+train['stopwords'] = train['BODYTEXT'].apply(lambda x: len([x for x in x.split() if x in stop]))
+train['hashtags'] = train['BODYTEXT'].apply(lambda x: len([x for x in x.split() if x.startswith('#')]))
+train['numerics'] = train['BODYTEXT'].apply(lambda x: len([x for x in x.split() if x.isdigit()]))
+train['upper'] = train['BODYTEXT'].apply(lambda x: len([x for x in x.split() if x.isupper()]))
+
+print(train[['BODYTEXT','word_count','char_count','avg_word','stopwords','hashtags','numerics','upper']].head())
+
+#unfreq
+#freq
+#print freq to see the most common words
+
+
+
+#first cleans the text
+#this give us a term-frequency inverse-document-frequency list
+#just kidding this gives us a bag of words
+
+import pandas as pd
+import numpy as np
+import nltk
+nltk.download('wordnet')
+import textblob
+from nltk.corpus import stopwords
+from textblob import TextBlob
+from nltk.stem import PorterStemmer
+from textblob import Word
+import csv
+from sklearn.feature_extraction.text import CountVectorizer
+
+
+stop = stopwords.words('english')
+train = pd.read_csv('\\\\RTNAS01\\data\\RT-Claims-SIU-User\\Renton_Analyst_Files\\ACA Files\\1 ACAs in Progress\\Check Washing Predictive Analytics\\CHKW_claims_forText_Mining.csv')
+st = PorterStemmer()
+
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x.lower() for x in x.split()))
+train['BODYTEXT'] = train['BODYTEXT'].str.replace('[^\w\s]','')
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
+freq = pd.Series(' '.join(train['BODYTEXT']).split()).value_counts()[:10]
+unfreq = pd.Series(' '.join(train['BODYTEXT']).split()).value_counts()[-10:]
+freq = list(freq.index)
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join(x for x in x.split() if x not in freq))
+unfreq = list(unfreq.index)
+#train['tweet'] = train['tweet'].apply(lambda x: " ".join(x for x in x.split() if x not in unfreq))
+#train['tweet'][:5].apply(lambda x: " ".join([st.stem(word) for word in x.split()]))
+#this is for stemming, but we usually prefer lemmatization
+train['BODYTEXT'] = train['BODYTEXT'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
+#train['BODYTEXT'].head()
+
+bow = CountVectorizer(max_features=1000, lowercase=True, ngram_range=(1,1),analyzer = "word")
+train_bow = bow.fit_transform(train['BODYTEXT'])
+print(train_bow)
