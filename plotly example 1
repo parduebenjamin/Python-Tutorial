@@ -1,0 +1,70 @@
+import plotly as py
+import plotly.graph_objs as go
+import ipywidgets as widgets
+import numpy as np
+from scipy import special
+
+py.offline.init_notebook_mode(connected=True)
+
+x = np.linspace(0, np.pi, 1000)
+
+layout = go.Layout(
+    title='First Example',
+    yaxis=dict(
+        title='volts'
+    ),
+    xaxis=dict(
+        title='nanoseconds'
+    )
+)
+
+trace1 = go.Scatter(
+    x=x,
+    y=np.sin(x),
+    mode='lines',
+    name='sin(x)',
+    #interpolation are how the dots are connected with lines
+    line=dict(
+        shape='spline'
+    )
+    #markers, lines, and lines+markers are scatter options
+)
+
+fig = go.Figure(data = [trace1], layout=layout)
+py.offline.iplot(fig)
+
+x = np.linspace(0, np.pi, 1000)
+
+layout = go.Layout(
+    title='Second Example',
+    yaxis=dict(
+        title='volts'
+    ),
+    xaxis=dict(
+        title='nanoseconds'
+    )
+)
+
+def update_plot(signals, freq):
+    
+    data = []
+    for s in signals:
+        trace1 = go.Scatter(
+            x=x,
+            y=special.jv(s, freq * x),
+            mode='lines',
+            name='bessel {}'.format(s),
+            #interpolation are how the dots are connected with lines
+            line=dict(
+                shape='spline'
+            )
+            #markers, lines, and lines+markers are scatter options
+        )
+        data.append(trace1)
+
+    fig = go.Figure(data = data, layout=layout)
+    py.offline.iplot(fig)
+    
+signals = widgets.SelectMultiple(options=list(range(6)), value=(0, ), description='Bessel Order')
+freq = widgets.FloatSlider(min=1, max=10, value=1, description='Freq')
+widgets.interactive(update_plot, signals=signals,freq=freq)
